@@ -4,7 +4,7 @@ using Base: Fix1, Fix2
 
 using OhMyThreads
 
-export integrate
+export integrate, norm_L1, norm_L2
 
 function integrate(f, knots_or_dx; threaded=true)
   if !threaded
@@ -21,6 +21,11 @@ function integrate(f, knots_or_dx, knots_or_dy; threaded=true)
     return integrate_2d_threaded_impl(f, knots_or_dx, knots_or_dy)
   end
 end
+
+norm_L1(f::Function, knots...; threaded=true) = integrate((arg...) -> abs(f(arg...)), knots..., ; threaded=threaded)
+norm_L1(f_data, ds...; threaded=true) = integrate(abs.(f_data), ds...; threaded=threaded)
+norm_L2(f::Function, knots...; threaded=true) = sqrt(integrate((arg...) -> f(arg...)^2, knots...; threaded=threaded))
+norm_L2(f_data, ds...; threaded=true) = integrate(f_data .^ 2, ds...; threaded=threaded)
 
 function integrate_1d_serial_impl(f_data, dx::Number)
   res = @views 0.5 * dx * (sum(f_data[begin:end-1]) + sum(f_data[begin+1:end]))
