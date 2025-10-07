@@ -47,7 +47,7 @@ function integrate_1d_serial_impl(f::Function, x::AbstractRange)
   return 0.5 * dx * acc
 end
 
-function integrate_1d_threaded_impl(f::Function, x)
+function integrate_1d_serial_impl(f::Function, x)
   res = @views 0.5 * mapreduce(+, x[begin:end-1], x[begin+1:end]) do xL, xR
     return (xR - xL) * (f(xL) + f(xR))
   end
