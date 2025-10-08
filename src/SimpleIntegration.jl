@@ -6,19 +6,19 @@ using OhMyThreads
 
 export integrate, norm_L1, norm_L2
 
-function integrate(f, knots_or_dx; threaded=true)
-  if !threaded
-    return integrate_1d_serial_impl(f, knots_or_dx)
+function integrate(f, knots_or_steps...; threaded=true)
+  if length(knots_or_steps) == 1
+    if !threaded
+      return integrate_1d_serial_impl(f, knots_or_steps...)
+    else
+      return integrate_1d_threaded_impl(f, knots_or_steps...)
+    end
   else
-    return integrate_1d_threaded_impl(f, knots_or_dx)
-  end
-end
-
-function integrate(f, knots_or_dx, knots_or_dy; threaded=true)
-  if !threaded
-    return integrate_2d_serial_impl(f, knots_or_dx, knots_or_dy)
-  else
-    return integrate_2d_threaded_impl(f, knots_or_dx, knots_or_dy)
+    if !threaded
+      return integrate_2d_serial_impl(f, knots_or_steps...)
+    else
+      return integrate_2d_threaded_impl(f, knots_or_steps...)
+    end
   end
 end
 
