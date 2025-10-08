@@ -1,7 +1,7 @@
 name = "SimpleIntegration"
 uuid = "f1de6737-2331-4f40-83c2-33cf2af9fc78"
 authors = ["Sasha Fleming <fleming@stce.rwth-aachen.de> and contributors"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 OhMyThreads = "67456a42-1dca-4109-a031-0a68de7e3ad5"
