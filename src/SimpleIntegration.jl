@@ -100,14 +100,14 @@ end
 function integrate_2d_serial_impl(f::Function, x::AbstractRange, y::AbstractRange)
   dA = step(x) * step(y)
   acc = f(x[begin], y[begin]) + f(x[end], y[begin]) + f(x[begin], y[end]) + f(x[end], y[end])
-  acc += 2 * mapreduce(Fix2(f, y[begin]), +, x[begin+1:end-1])
-  acc += 2 * mapreduce(Fix2(f, y[end]), +, x[begin+1:end-1])
-  acc += 2 * mapreduce(Fix1(f, x[begin]), +, y[begin+1:end-1])
-  acc += 2 * mapreduce(Fix1(f, x[end]), +, y[begin+1:end-1])
+  acc += 2 * mapreduce(Fix2(f, y[begin]), +, x[begin+1:end-1]; init=zero(acc))
+  acc += 2 * mapreduce(Fix2(f, y[end]), +, x[begin+1:end-1]; init=zero(acc))
+  acc += 2 * mapreduce(Fix1(f, x[begin]), +, y[begin+1:end-1]; init=zero(acc))
+  acc += 2 * mapreduce(Fix1(f, x[end]), +, y[begin+1:end-1]; init=zero(acc))
   i_idxs = axes(x, 1)
   j_idxs = axes(y, 1)
   idxs = CartesianIndex(2, 2):CartesianIndex(length(x) - 1, length(y) - 1)
-  acc += 4 * mapreduce(+, idxs) do idx
+  acc += 4 * mapreduce(+, idxs; init=zero(acc)) do idx
     i = i_idxs[idx[1]]
     j = j_idxs[idx[2]]
     return f(x[i], y[j])
@@ -121,10 +121,10 @@ function integrate_2d_threaded_impl(f_data, dx::Number, dy::Number)
   acc = f_data[begin, begin] + f_data[end, end] + f_data[begin, end] + f_data[end, begin]
   @views begin
     # edge terms
-    acc += 2 * tmapreduce(+, +, f_data[begin+1:end-1, begin], f_data[begin+1:end-1, end])
-    acc += 2 * tmapreduce(+, +, f_data[begin, begin+1:end-1], f_data[end, begin+1:end-1])
+    acc += 2 * tmapreduce(+, +, f_data[begin+1:end-1, begin], f_data[begin+1:end-1, end]; init=zero(acc))
+    acc += 2 * tmapreduce(+, +, f_data[begin, begin+1:end-1], f_data[end, begin+1:end-1]; init=zero(acc))
     # bulk terms
-    acc += 4 * treduce(+, f_data[begin+1:end-1, begin+1:end-1])
+    acc += 4 * treduce(+, f_data[begin+1:end-1, begin+1:end-1]; init=zero(acc))
   end
   return (acc / 4) * dA
 end
@@ -132,14 +132,14 @@ end
 function integrate_2d_threaded_impl(f::Function, x::AbstractRange, y::AbstractRange)
   dA = step(x) * step(y)
   acc = f(x[begin], y[begin]) + f(x[end], y[begin]) + f(x[begin], y[end]) + f(x[end], y[end])
-  acc += 2 * tmapreduce(Fix2(f, y[begin]), +, x[begin+1:end-1])
-  acc += 2 * tmapreduce(Fix2(f, y[end]), +, x[begin+1:end-1])
-  acc += 2 * tmapreduce(Fix1(f, x[begin]), +, y[begin+1:end-1])
-  acc += 2 * tmapreduce(Fix1(f, x[end]), +, y[begin+1:end-1])
+  acc += 2 * tmapreduce(Fix2(f, y[begin]), +, x[begin+1:end-1]; init=zero(acc))
+  acc += 2 * tmapreduce(Fix2(f, y[end]), +, x[begin+1:end-1]; init=zero(acc))
+  acc += 2 * tmapreduce(Fix1(f, x[begin]), +, y[begin+1:end-1]; init=zero(acc))
+  acc += 2 * tmapreduce(Fix1(f, x[end]), +, y[begin+1:end-1]; init=zero(acc))
   i_idxs = axes(x, 1)
   j_idxs = axes(y, 1)
   idxs = CartesianIndex(2, 2):CartesianIndex(length(x) - 1, length(y) - 1)
-  acc += 4 * tmapreduce(+, idxs) do idx
+  acc += 4 * tmapreduce(+, idxs; init=zero(acc)) do idx
     i = i_idxs[idx[1]]
     j = j_idxs[idx[2]]
     return f(x[i], y[j])
