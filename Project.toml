@@ -1,6 +1,6 @@
 name = "SimpleIntegration"
 uuid = "f1de6737-2331-4f40-83c2-33cf2af9fc78"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Sasha Fleming <fleming@stce.rwth-aachen.de> and contributors"]
 
 [deps]
