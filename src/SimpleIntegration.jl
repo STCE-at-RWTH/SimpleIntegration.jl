@@ -1,6 +1,7 @@
 module SimpleIntegration
 
 using Base: Fix1, Fix2
+using LinearAlgebra
 
 using OhMyThreads
 
@@ -22,10 +23,26 @@ function integrate(f, knots_or_steps...; threaded=true)
   end
 end
 
-norm_L1(f::Function, knots...; threaded=true) = integrate((arg...) -> sum(abs, f(arg...)), knots..., ; threaded=threaded)
-norm_L1(f_data, ds...; threaded=true) = integrate(map(v -> sum(abs, v), f_data), ds...; threaded=threaded)
-norm_L2(f::Function, knots...; threaded=true) = sqrt(integrate((arg...) -> f(arg...)' * f(arg...), knots...; threaded=threaded))
-norm_L2(f_data, ds...; threaded=true) = integrate(map(v -> v' * v, f_data), ds...; threaded=threaded)
+### NORMS
+
+# quick dispatch for opnorm
+# might cause problems if there are other
+# opnorm-able objects we want to integrate later
+# but I doubt that will happen
+
+# spectral norm
+# dispatch should handle the difference between scalars & vectors & matrices
+_opnorm2_sqr(u) = eigmax(u' * u)
+# maximum absolute column sum
+_opnorm1(u) = sum(abs, u)
+_opnorm1(u::AbstractMatrix) = maximum(sum(abs, u; dims=1))
+
+norm_L1(f::Function, knots...; threaded=true) = integrate((arg...) -> _opnorm1(f(arg...)), knots..., ; threaded=threaded)
+norm_L1(f_data, ds...; threaded=true) = integrate(map(_opnorm1, f_data), ds...; threaded=threaded)
+norm_L2(f::Function, knots...; threaded=true) = sqrt(integrate((arg...) -> _opnorm2_sqr(f(arg...)), knots...; threaded=threaded))
+norm_L2(f_data, ds...; threaded=true) = integrate(map(_opnorm2_sqr, f_data), ds...; threaded=threaded)
+
+## INTEGRATOR IMPLEMENTATIONS
 
 function integrate_1d_serial_impl(f_data, dx::Number)
   res = @views 0.5 * dx * (sum(f_data[begin:end-1]) + sum(f_data[begin+1:end]))

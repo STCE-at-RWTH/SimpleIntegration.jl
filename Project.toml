@@ -1,9 +1,10 @@
 name = "SimpleIntegration"
 uuid = "f1de6737-2331-4f40-83c2-33cf2af9fc78"
-authors = ["Sasha Fleming <fleming@stce.rwth-aachen.de> and contributors"]
 version = "0.1.2"
+authors = ["Sasha Fleming <fleming@stce.rwth-aachen.de> and contributors"]
 
 [deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OhMyThreads = "67456a42-1dca-4109-a031-0a68de7e3ad5"
 
 [compat]
@@ -11,7 +12,8 @@ OhMyThreads = "0.8.3"
 julia = "1.11"
 
 [extras]
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Test", "StaticArrays"]
